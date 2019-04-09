@@ -56,42 +56,59 @@ var dataCategories = [];
 var sortIndex = 0;
 var sortDirection = 1;
 
-document.addEventListener("onload", function () {
-	defineDataArray();
-	writeTableData();
+window.addEventListener("load", function () {
+      defineDataArray();
+      writeTableData();
 });
 
 function defineDataArray() {
-	var tableRows = document.querySelectorAll("table.sortable tbody tr");
-	for (var i = 0; i <= tableRows.length; i++) {
-		var rowCells = tableRows[i].children;
-		var rowValues = [].rowCells.length;
-		for (var j = 0; j <= rowCells.length; j++) {
-			rowValues[j].push(rowCells.textContent);
-		}
-		tableData[i].push(rowValues);
-	}
-	tableData.sort(dataSort2D);
+      var tableRows = document.querySelectorAll("table.sortable tbody tr");
+      for (var i = 0; i < tableRows.length; i++) {
+            var rowCells = tableRows[i].children;
+            var rowValues = new Array(rowCells.length);
+            for (var j = 0; j < rowCells.length; j++) {
+                  rowValues[j] = rowCells[j].textContent;
+            }
+            tableData[i] = rowValues;
+      }
+      tableData.sort(dataSort2D);
 }
 
 function writeTableData() {
-	var body = document.createElement("tbody");
-	var row = document.createElement("tr");
-	body.appendChild(row);
+      var newTableBody = document.createElement("tbody");
+      for (var i = 0; i < tableData.length; i++) {
+            var row = document.createElement("tr");
+            for (var j = 0; j < tableData[i].length; j++) {
+                  var tableCell = document.createElement("td");
+                  tableCell.textContent = tableData[i][j];
+                  row.appendChild(tableCell);
+            }
+            newTableBody.appendChild(row);
+      }
+      var sortTable = document.querySelector("table.sortable");
+      var oldTable = sortTable.lastElementChild;
+      sortTable.replaceChild(newTableBody, oldTable);
+}
+
+function defineColumns() {
+      var headStyles = document.createElement("style");
+      document.head.appendChild(headStyles);
+
+
 }
 
 
 
 
 function dataSort2D(a, b) {
-	if (isNaN(parseFloat(a[sortIndex])) === false) {
-		return (a[sortIndex] - b[sortIndex]) * sortDirection;
-	} else {
-		var astring = a[sortIndex].toLowerCase();
-		var bstring = b[sortIndex].toLowerCase();
+      if (isNaN(parseFloat(a[sortIndex])) === false) {
+            return (a[sortIndex] - b[sortIndex]) * sortDirection;
+      } else {
+            var astring = a[sortIndex].toLowerCase();
+            var bstring = b[sortIndex].toLowerCase();
 
-		if (bstring > astring) return -sortDirection;
-		if (bstring < astring) return sortDirection;
-		return 0;
-	}
+            if (bstring > astring) return -sortDirection;
+            if (bstring < astring) return sortDirection;
+            return 0;
+      }
 }
