@@ -51,19 +51,25 @@
     
 
 */
+// the gloabl arrays and variables used throughout the program
 var tableData = [];
 var dataCategories = [];
 var sortIndex = 0;
 var sortDirection = 1;
-
+//Loads the three functions on load.
 window.addEventListener("load", function () {
       defineDataArray();
       writeTableData();
+      defineColumns();
 });
 
+
+
 function defineDataArray() {
+      //creates a like array with the table rows
       var tableRows = document.querySelectorAll("table.sortable tbody tr");
       for (var i = 0; i < tableRows.length; i++) {
+            //this gets the text content of the table cells and puts them in to a new array that is created and then switches it into a global variable
             var rowCells = tableRows[i].children;
             var rowValues = new Array(rowCells.length);
             for (var j = 0; j < rowCells.length; j++) {
@@ -71,32 +77,110 @@ function defineDataArray() {
             }
             tableData[i] = rowValues;
       }
+      //this sorts the gloal array with the textcontent of the cells
       tableData.sort(dataSort2D);
 }
 
+
 function writeTableData() {
+      //this creates all a new table body with the sorted text content of the global var
       var newTableBody = document.createElement("tbody");
       for (var i = 0; i < tableData.length; i++) {
-            var row = document.createElement("tr");
+            var tableRow = document.createElement("tr");
             for (var j = 0; j < tableData[i].length; j++) {
                   var tableCell = document.createElement("td");
                   tableCell.textContent = tableData[i][j];
-                  row.appendChild(tableCell);
+                  tableRow.appendChild(tableCell);
             }
-            newTableBody.appendChild(row);
+            newTableBody.appendChild(tableRow);
       }
+      //this replaces the old table
       var sortTable = document.querySelector("table.sortable");
-      var oldTable = sortTable.lastElementChild;
-      sortTable.replaceChild(newTableBody, oldTable);
+      var oldTableBody = sortTable.lastElementChild;
+      sortTable.replaceChild(newTableBody, oldTableBody);
 }
 
 function defineColumns() {
-      var headStyles = document.createElement("style");
-      document.head.appendChild(headStyles);
+      // Create a style element
+      var styleSheet = document.createElement("style");
+      // Add that element to the head.
+      document.head.appendChild(styleSheet);
 
+      // Insert the following rule into the stylesheet:
+      styleSheet.sheet.insertRule(
+            "table.sortable thead tr th { \
+                  cursor: pointer;\
+            }", 0);
 
+      // Insert the following rule into the stylesheet:
+      styleSheet.sheet.insertRule(
+            "table.sortable thead tr th::after { \
+                  content: '\\00a0';\
+                  font-family: monospace;\
+                  margin-left: 5px;\
+            }", 1);
+
+      // Insert the following rule into the stylesheet:
+      styleSheet.sheet.insertRule(
+            "table.sortable thead tr th:nth-of-type(1)::after {\
+                  content: '\\25b2';\
+            }", 2);
+
+      // Get all of the table headers
+      var thHeadings = document.querySelectorAll("table.sortable thead th");
+      // Loop through the headers
+      for (var i = 0; i < thHeadings.length; i++) {
+            // Add the heading text content to the dataCategories array.
+            dataCategories.push(thHeadings[i].textContent);
+            // Add the onclick handler to the header that calls the columnSort function.
+            thHeadings[i].onclick = columnSort;
+      }
 }
 
+/**
+ * Sorts the columns when it is clicked.
+ */
+function columnSort(e) {
+      // Gets the text content from the targeted element.
+      var columnText = e.target.textContent;
+      // Gets the index of the column from the dataCategories array.
+      var columnIndex = dataCategories.indexOf(columnText);
+
+      // If the columnIndex is the same as the sortIndex, change the sortDirection.
+      if (columnIndex === sortIndex) {
+            sortDirection *= -1;
+      } else {
+            //else, set the sortIndex equal to the value of the column index
+            sortIndex = columnIndex;
+      }
+
+      // Get the column number.
+      var columnNumber = columnIndex + 1;
+
+      // Get the style sheet for the columns.
+      var columnStyles = document.styleSheets[document.styleSheets.length - 1];
+
+      // Delete the third style rule.
+      columnStyles.deleteRule(2);
+
+      // If the sortDirection is up then add the up arrow ^
+      if (sortDirection === 1) {
+            columnStyles.insertRule(
+                  "table.sortable thead tr th:nth-of-type(" + columnNumber + ")::after { \
+                        content: '\\25b2';\
+                  }", 2);
+      } else {
+            // Else add the down arrow v
+            columnStyles.insertRule(
+                  "table.sortable thead tr th:nth-of-type(" + columnNumber + ")::after { \
+                        content: '\\25bc';\
+                  }", 2);
+      }
+      // Sort the table data using the dataSort2D function.
+      tableData.sort(dataSort2D);
+      // Write the table data.
+      writeTableData();
+}
 
 
 
